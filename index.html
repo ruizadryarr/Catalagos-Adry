@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogos Adry</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#fff9f7;color:#44343a}
+header{background:#713f58;color:white;text-align:center;padding:30px 15px}
+header h1{margin:0;font-size:27px}
+header p{margin-bottom:0}
+main{padding:18px;max-width:950px;margin:auto}
+h2{text-align:center;color:#713f58}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px}
+.product{background:white;border-radius:14px;padding:12px;text-align:center;box-shadow:0 2px 9px #0001}
+.product img{width:100%;height:145px;object-fit:contain;background:#fff7f4;border-radius:10px}
+.price{font-size:19px;color:#a34d72;font-weight:bold}
+button{background:#713f58;color:white;border:0;border-radius:20px;padding:11px 16px;margin:5px;cursor:pointer}
+.cart{background:white;border-radius:14px;padding:15px;margin-top:25px}
+footer{text-align:center;padding:25px;color:#713f58}
+</style>
+</head>
+<body>
+<header>
+<h1>TODO EN UN MISMO LUGAR CON ADRY ☺️</h1>
+<p>Catálogos, belleza, hogar y mucho más</p>
+</header>
+
+<main>
+<h2>🛍️ Nuestro catálogo</h2>
+<p style="text-align:center">Descubre nuestros productos disponibles.</p>
+<div class="grid" id="productos"></div>
+
+<div class="cart">
+<h2>🛒 Mi carrito</h2>
+<div id="carrito">Aún no agregas productos.</div>
+<h3 id="total">Total: $0</h3>
+<button onclick="enviarPedido()">Finalizar pedido por WhatsApp</button>
+</div>
+</main>
+
+<footer>Gracias por comprar con Adry ❤️</footer>
+
+<script>
+const productos = [
+{nombre:"Producto de belleza",precio:100,stock:5},
+{nombre:"Artículo para el hogar",precio:150,stock:5},
+{nombre:"Accesorio",precio:80,stock:5},
+{nombre:"Perfume",precio:200,stock:5}
+];
+
+let carrito=[];
+
+function mostrarProductos(){
+document.getElementById("productos").innerHTML=productos.map((p,i)=>`
+<div class="product">
+<img src="https://placehold.co/300x300?text=Producto" alt="Producto">
+<h3>${p.nombre}</h3>
+<p class="price">$${p.precio}</p>
+<p>Disponibles: ${p.stock} pzs.</p>
+<button onclick="agregar(${i})">Agregar al carrito</button>
+</div>`).join("");
+}
+
+function agregar(i){
+let p=productos[i];
+let item=carrito.find(x=>x.i===i);
+let cantidad=item?item.cantidad:0;
+if(cantidad>=p.stock){alert("No hay más piezas disponibles");return;}
+if(item)item.cantidad++;
+else carrito.push({i,cantidad:1});
+mostrarCarrito();
+}
+
+function mostrarCarrito(){
+let total=0;
+document.getElementById("carrito").innerHTML=carrito.length?
+carrito.map(x=>{
+let p=productos[x.i];
+total+=p.precio*x.cantidad;
+return `<p>${p.nombre} x ${x.cantidad} — $${p.precio*x.cantidad}
+<button onclick="quitar(${x.i})">Quitar</button></p>`;
+}).join(""):"Aún no agregas productos.";
+document.getElementById("total").textContent="Total: $"+total;
+}
+
+function quitar(i){
+let item=carrito.find(x=>x.i===i);
+if(item.cantidad>1)item.cantidad--;
+else carrito=carrito.filter(x=>x.i!==i);
+mostrarCarrito();
+}
+
+function enviarPedido(){
+if(!carrito.length){alert("Agrega productos primero");return;}
+let mensaje="Hola Adry, me interesa hacer este pedido:\n";
+let total=0;
+carrito.forEach(x=>{
+let p=productos[x.i];
+mensaje+=`${p.nombre} x ${x.cantidad} - $${p.precio*x.cantidad}\n`;
+total+=p.precio*x.cantidad;
+});
+mensaje+="Total: $"+total;
+window.open("https://wa.me/523323793331?text="+encodeURIComponent(mensaje),"_blank");
+}
+
+mostrarProductos();
+</script>
+</body>
+</html>
