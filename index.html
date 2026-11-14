@@ -4,108 +4,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogos Adry</title>
+<title>Catálogo Adry</title>
 <style>
-body{margin:0;font-family:Arial,sans-serif;background:#fff9f7;color:#44343a}
-header{background:#713f58;color:white;text-align:center;padding:30px 15px}
-header h1{margin:0;font-size:27px}
-header p{margin-bottom:0}
-main{padding:18px;max-width:950px;margin:auto}
-h2{text-align:center;color:#713f58}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px}
-.product{background:white;border-radius:14px;padding:12px;text-align:center;box-shadow:0 2px 9px #0001}
-.product img{width:100%;height:145px;object-fit:contain;background:#fff7f4;border-radius:10px}
-.price{font-size:19px;color:#a34d72;font-weight:bold}
-button{background:#713f58;color:white;border:0;border-radius:20px;padding:11px 16px;margin:5px;cursor:pointer}
-.cart{background:white;border-radius:14px;padding:15px;margin-top:25px}
-footer{text-align:center;padding:25px;color:#713f58}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#faf7f8;color:#392c35}
+header{background:#702c50;color:white;text-align:center;padding:35px 15px}
+header h1{font-size:25px;letter-spacing:1px}
+header p{font-size:14px}
+nav{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;padding:15px}
+button{cursor:pointer;border:0;border-radius:20px;padding:11px 16px}
+nav button{background:#ead9e2;color:#702c50}
+nav button.active{background:#702c50;color:white}
+main{max-width:1000px;margin:auto;padding:15px}
+h2{color:#702c50}
+#productos{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:15px}
+.producto{background:white;border-radius:13px;padding:12px;box-shadow:0 2px 9px #00000012}
+.producto img{width:100%;height:150px;object-fit:contain;background:#f7f1f4;border-radius:9px}
+.producto h3{font-size:15px}
+.precio{font-weight:bold;color:#702c50}
+.producto button,.pedido{background:#702c50;color:white;width:100%;margin-top:8px}
+#carrito{background:white;border-radius:14px;padding:18px;margin-top:28px}
+.linea{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #eee}
+input{padding:10px;border:1px solid #ddd;border-radius:9px;width:100%;margin:8px 0}
+footer{text-align:center;padding:25px;color:#806b77}
 </style>
 </head>
 <body>
+
 <header>
 <h1>TODO EN UN MISMO LUGAR CON ADRY ☺️</h1>
-<p>Catálogos, belleza, hogar y mucho más</p>
+<p>Tu espacio de belleza, hogar, salud y mucho más.</p>
 </header>
 
-<main>
-<h2>🛍️ Nuestro catálogo</h2>
-<p style="text-align:center">Descubre nuestros productos disponibles.</p>
-<div class="grid" id="productos"></div>
+<nav id="categorias">
+<button class="active" onclick="filtrar('Todos',this)">Todos</button>
+<button onclick="filtrar('Belleza',this)">Belleza</button>
+<button onclick="filtrar('Perfumes',this)">Perfumes</button>
+<button onclick="filtrar('Hogar',this)">Hogar</button>
+<button onclick="filtrar('Accesorios',this)">Accesorios</button>
+<button onclick="filtrar('Salud',this)">Salud</button>
+</nav>
 
-<div class="cart">
+<main>
+<h2>Nuestro catálogo</h2>
+<input id="busqueda" placeholder="Buscar productos..." oninput="mostrar()">
+<div id="productos"></div>
+
+<section id="carrito">
 <h2>🛒 Mi carrito</h2>
-<div id="carrito">Aún no agregas productos.</div>
-<h3 id="total">Total: $0</h3>
-<button onclick="enviarPedido()">Finalizar pedido por WhatsApp</button>
-</div>
+<div id="lista">Tu carrito está vacío.</div>
+<h3 id="total">Total: $0.00</h3>
+<input id="nombre" placeholder="Tu nombre">
+<button class="pedido" onclick="enviarPedido()">Enviar pedido por WhatsApp</button>
+<p style="font-size:12px;color:#806b77">Tu pedido se confirma personalmente por WhatsApp. La existencia no se descuenta automáticamente.</p>
+</section>
 </main>
 
-<footer>Gracias por comprar con Adry ❤️</footer>
+<footer>
+TODO EN UN MISMO LUGAR CON ADRY ☺️<br>
+Gracias por tu preferencia.
+</footer>
 
 <script>
-const productos = [
-{nombre:"Producto de belleza",precio:100,stock:5},
-{nombre:"Artículo para el hogar",precio:150,stock:5},
-{nombre:"Accesorio",precio:80,stock:5},
-{nombre:"Perfume",precio:200,stock:5}
-];
+const WHATSAPP = "523323793331";
 
-let carrito=[];
+// Aquí agregaremos tus productos y fotografías.
+const productos = [];
 
-function mostrarProductos(){
-document.getElementById("productos").innerHTML=productos.map((p,i)=>`
-<div class="product">
-<img src="https://placehold.co/300x300?text=Producto" alt="Producto">
-<h3>${p.nombre}</h3>
-<p class="price">$${p.precio}</p>
-<p>Disponibles: ${p.stock} pzs.</p>
-<button onclick="agregar(${i})">Agregar al carrito</button>
-</div>`).join("");
+let categoria = "Todos";
+let carrito = [];
+
+function filtrar(nombre,boton){
+ categoria=nombre;
+ document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+ boton.classList.add("active");
+ mostrar();
 }
 
-function agregar(i){
-let p=productos[i];
-let item=carrito.find(x=>x.i===i);
-let cantidad=item?item.cantidad:0;
-if(cantidad>=p.stock){alert("No hay más piezas disponibles");return;}
-if(item)item.cantidad++;
-else carrito.push({i,cantidad:1});
-mostrarCarrito();
+function mostrar(){
+ const busqueda=document.getElementById("busqueda").value.toLowerCase();
+ const contenedor=document.getElementById("productos");
+ const encontrados=productos.filter(p=>
+ (categoria==="Todos"||p.categoria===categoria)&&
+ p.nombre.toLowerCase().includes(busqueda)&&p.stock>0
+ );
+ if(!encontrados.length){
+ contenedor.innerHTML="<p>Aún estamos preparando nuestros productos. ¡Muy pronto encontrarás novedades!</p>";
+ return;
+ }
+ contenedor.innerHTML=encontrados.map(p=>`
+ <article class="producto">
+ <img src="${p.foto}" alt="${p.nombre}">
+ <h3>${p.nombre}</h3>
+ <p class="precio">$${p.precio.toFixed(2)}</p>
+ <p>Disponibles: ${p.stock} pzs.</p>
+ <button onclick="agregar(${p.id})">Agregar al carrito</button>
+ </article>`).join("");
 }
 
-function mostrarCarrito(){
-let total=0;
-document.getElementById("carrito").innerHTML=carrito.length?
-carrito.map(x=>{
-let p=productos[x.i];
-total+=p.precio*x.cantidad;
-return `<p>${p.nombre} x ${x.cantidad} — $${p.precio*x.cantidad}
-<button onclick="quitar(${x.i})">Quitar</button></p>`;
-}).join(""):"Aún no agregas productos.";
-document.getElementById("total").textContent="Total: $"+total;
+function agregar(id){
+ const p=productos.find(x=>x.id===id);
+ const cantidad=carrito.find(x=>x.id===id);
+ if(!p||p.stock<=0)return;
+ if(cantidad){
+ if(cantidad.cantidad>=p.stock){alert("No hay más piezas disponibles.");return;}
+ cantidad.cantidad++;
+ }else{
+ carrito.push({id,cantidad:1});
+ }
+ actualizar();
 }
 
-function quitar(i){
-let item=carrito.find(x=>x.i===i);
-if(item.cantidad>1)item.cantidad--;
-else carrito=carrito.filter(x=>x.i!==i);
-mostrarCarrito();
+function actualizar(){
+ const lista=document.getElementById("lista");
+ if(!carrito.length){
+ lista.innerHTML="Tu carrito está vacío.";
+ }else{
+ lista.innerHTML=carrito.map(c=>{
+ const p=productos.find(x=>x.id===c.id);
+ return `<div class="linea">
+ <span>${p.nombre} x ${c.cantidad}</span>
+ <span>$${(p.precio*c.cantidad).toFixed(2)}
+ <button onclick="quitar(${p.id})">−</button></span>
+ </div>`;
+ }).join("");
+ }
+ const total=carrito.reduce((s,c)=>{
+ const p=productos.find(x=>x.id===c.id);
+ return s+p.precio*c.cantidad;
+ },0);
+ document.getElementById("total").textContent="Total: $"+total.toFixed(2);
+}
+
+function quitar(id){
+ const c=carrito.find(x=>x.id===id);
+ if(c){
+ c.cantidad--;
+ if(c.cantidad<=0)carrito=carrito.filter(x=>x.id!==id);
+ }
+ actualizar();
 }
 
 function enviarPedido(){
-if(!carrito.length){alert("Agrega productos primero");return;}
-let mensaje="Hola Adry, me interesa hacer este pedido:\n";
-let total=0;
-carrito.forEach(x=>{
-let p=productos[x.i];
-mensaje+=`${p.nombre} x ${x.cantidad} - $${p.precio*x.cantidad}\n`;
-total+=p.precio*x.cantidad;
-});
-mensaje+="Total: $"+total;
-window.open("https://wa.me/523323793331?text="+encodeURIComponent(mensaje),"_blank");
+ if(!carrito.length){alert("Agrega productos a tu carrito primero.");return;}
+ const nombre=document.getElementById("nombre").value.trim();
+ if(!nombre){alert("Escribe tu nombre, por favor.");return;}
+ let mensaje="Hola Adry, soy "+nombre+". Me interesa realizar este pedido:\n\n";
+ carrito.forEach(c=>{
+ const p=productos.find(x=>x.id===c.id);
+ mensaje+=p.nombre+" x "+c.cantidad+" = $"+(p.precio*c.cantidad).toFixed(2)+"\n";
+ });
+ const total=carrito.reduce((s,c)=>s+productos.find(x=>x.id===c.id).precio*c.cantidad,0);
+ mensaje+="\nTotal: $"+total.toFixed(2);
+ mensaje+="\n\nQuisiera confirmar disponibilidad y entrega.";
+ window.open("https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(mensaje),"_blank");
 }
 
-mostrarProductos();
+mostrar();
+actualizar();
 </script>
 </body>
 </html>
